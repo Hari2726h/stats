@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Loader2, Palette, Save, Sparkles } from "lucide-react";
+import { Loader2, Save, Sparkles } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import ColorPickerField from "../ColorPicker/ColorPickerField";
@@ -21,8 +21,6 @@ export default function ThemeConfigurator({
   error,
   onLogoSelect,
   logoError,
-  onGenerateTheme,
-  aiThemeLoading,
   onSavePreset,
 }) {
   const {
@@ -49,7 +47,7 @@ export default function ThemeConfigurator({
       <Card className="glass">
         <CardHeader>
           <CardTitle>Configuration Panel</CardTitle>
-          <CardDescription>Adjust styles, validate match ID, and generate themes.</CardDescription>
+          <CardDescription>Adjust styles and validate match ID.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -132,10 +130,6 @@ export default function ThemeConfigurator({
           <LogoUploader onFileSelect={onLogoSelect} error={logoError} logoName={config.logoFileName} />
 
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="secondary" onClick={onGenerateTheme} disabled={aiThemeLoading}>
-              {aiThemeLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Palette className="mr-2 h-4 w-4" />}
-              Generate Theme from Logo
-            </Button>
             <Button type="button" variant="outline" onClick={onSavePreset}>
               <Save className="mr-2 h-4 w-4" />
               Save Theme Preset

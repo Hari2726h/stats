@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import app from "./app.js";
 
-dotenv.config();
+dotenv.config({ path: new URL("./.env", import.meta.url) });
 
 const port = Number(process.env.PORT || 5000);
 

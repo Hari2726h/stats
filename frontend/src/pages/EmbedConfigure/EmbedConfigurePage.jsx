@@ -1,39 +1,12 @@
 import { motion } from "framer-motion";
-import { Monitor, Smartphone } from "lucide-react";
+import { Loader2, Monitor, Smartphone, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import EmbedCodeGenerator from "../../components/EmbedCodeGenerator/EmbedCodeGenerator";
 import MatchWidgetPreview from "../../components/MatchPreview/MatchWidgetPreview";
 import ThemeConfigurator from "../../components/ThemeConfigurator/ThemeConfigurator";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { fetchMatchById, requestAIEmbedExamples, requestAITheme, uploadLogo } from "../../lib/api";
-
-function extractPaletteFromImage(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const image = new Image();
-      image.onload = () => {
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = 40;
-        canvas.height = 40;
-        context.drawImage(image, 0, 0, 40, 40);
-        const data = context.getImageData(0, 0, 40, 40).data;
-        const colors = [];
-        for (let i = 0; i < data.length; i += 80) {
-          const r = data[i].toString(16).padStart(2, "0");
-          const g = data[i + 1].toString(16).padStart(2, "0");
-          const b = data[i + 2].toString(16).padStart(2, "0");
-          colors.push(`#${r}${g}${b}`.toUpperCase());
-        }
-        resolve(Array.from(new Set(colors)).slice(0, 6));
-      };
-      image.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+import { fetchMatchById, requestAIEmbedExamples, requestAIMatchInsights, uploadLogo } from "../../lib/api";
 
 const defaultConfig = {
   matchId: "12345",
@@ -54,9 +27,11 @@ export default function EmbedConfigurePage() {
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState("");
   const [logoError, setLogoError] = useState("");
-  const [aiThemeLoading, setAiThemeLoading] = useState(false);
   const [aiExamples, setAiExamples] = useState(null);
   const [aiExamplesError, setAiExamplesError] = useState("");
+  const [aiInsights, setAiInsights] = useState(null);
+  const [aiInsightsLoading, setAiInsightsLoading] = useState(false);
+  const [aiInsightsError, setAiInsightsError] = useState("");
   const [previewDevice, setPreviewDevice] = useState("desktop");
   const [savedPresets, setSavedPresets] = useState([]);
 
@@ -102,33 +77,6 @@ export default function EmbedConfigurePage() {
     }
   };
 
-  const generateThemeFromLogo = async () => {
-    if (!config.logo) {
-      setLogoError("Upload a logo first to generate a theme.");
-      return;
-    }
-
-    setAiThemeLoading(true);
-    setLogoError("");
-
-    try {
-      const response = await fetch(config.logo);
-      const blob = await response.blob();
-      const palette = await extractPaletteFromImage(new File([blob], config.logoFileName || "logo.png", { type: blob.type }));
-      const suggestion = await requestAITheme(palette);
-      setConfig((previous) => ({
-        ...previous,
-        primaryColor: suggestion.primaryColor,
-        secondaryColor: suggestion.secondaryColor,
-        accentColor: suggestion.primaryColor,
-      }));
-    } catch (error) {
-      setLogoError(error.message || "API unavailable");
-    } finally {
-      setAiThemeLoading(false);
-    }
-  };
-
   const generateIntegrationExamples = async () => {
     setAiExamplesError("");
     try {
@@ -136,6 +84,31 @@ export default function EmbedConfigurePage() {
       setAiExamples(examples);
     } catch (error) {
       setAiExamplesError(error.message || "API unavailable");
+    }
+  };
+
+  const generateMatchInsights = async () => {
+    if (!matchData) {
+      setAiInsightsError("Load a valid match first.");
+      return;
+    }
+
+    setAiInsightsLoading(true);
+    setAiInsightsError("");
+
+    try {
+      const insights = await requestAIMatchInsights({
+        homeTeam: matchData.homeTeam,
+        awayTeam: matchData.awayTeam,
+        score: matchData.score,
+        stadium: matchData.stadium,
+        matchDate: String(matchData.matchDate),
+      });
+      setAiInsights(insights);
+    } catch (error) {
+      setAiInsightsError(error.message || "API unavailable");
+    } finally {
+      setAiInsightsLoading(false);
     }
   };
 
@@ -171,8 +144,6 @@ export default function EmbedConfigurePage() {
             error={matchError}
             onLogoSelect={handleLogoSelect}
             logoError={logoError}
-            onGenerateTheme={generateThemeFromLogo}
-            aiThemeLoading={aiThemeLoading}
             onSavePreset={savePreset}
           />
           <EmbedCodeGenerator
@@ -245,6 +216,28 @@ export default function EmbedConfigurePage() {
                 ))
               ) : (
                 <p className="text-sm text-slate-500 dark:text-slate-300">No presets saved yet.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>AI Match Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button type="button" onClick={generateMatchInsights} disabled={aiInsightsLoading}>
+                {aiInsightsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Generate AI Insights
+              </Button>
+              {aiInsightsError ? <p className="text-sm text-red-500">{aiInsightsError}</p> : null}
+              {aiInsights ? (
+                <div className="space-y-2 rounded-xl border border-border/70 bg-background/60 p-3">
+                  <p className="text-sm font-semibold">{aiInsights.headline}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">{aiInsights.summary}</p>
+                  <p className="text-sm font-medium text-primary">{aiInsights.cta}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500 dark:text-slate-300">Generate short AI copy for this match widget.</p>
               )}
             </CardContent>
           </Card>

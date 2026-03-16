@@ -23,11 +23,11 @@ export async function uploadLogo(file) {
   return data;
 }
 
-export async function requestAITheme(colors) {
-  const response = await fetch("/api/ai/theme", {
+export async function requestAIEmbedExamples(matchId, theme) {
+  const response = await fetch("/api/ai/embed-examples", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ colors }),
+    body: JSON.stringify({ matchId, theme }),
   });
   const data = await response.json();
   if (!response.ok) {
@@ -36,11 +36,11 @@ export async function requestAITheme(colors) {
   return data.data;
 }
 
-export async function requestAIEmbedExamples(matchId, theme) {
-  const response = await fetch("/api/ai/embed-examples", {
+export async function requestAIMatchInsights(matchDetails) {
+  const response = await fetch("/api/ai/match-insights", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ matchId, theme }),
+    body: JSON.stringify(matchDetails),
   });
   const data = await response.json();
   if (!response.ok) {
