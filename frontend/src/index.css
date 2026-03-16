@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 30% 98%;
+  --foreground: 228 24% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 228 24% 14%;
+  --primary: 224 76% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 228 24% 14%;
+  --accent: 221 84% 55%;
+  --accent-foreground: 0 0% 100%;
+  --border: 220 18% 90%;
+  --input: 220 18% 90%;
+  --ring: 224 76% 48%;
+}
+
+.dark {
+  --background: 227 34% 10%;
+  --foreground: 220 20% 96%;
+  --card: 228 29% 14%;
+  --card-foreground: 220 20% 96%;
+  --primary: 221 83% 60%;
+  --primary-foreground: 228 29% 14%;
+  --secondary: 228 20% 20%;
+  --secondary-foreground: 220 20% 96%;
+  --accent: 220 76% 62%;
+  --accent-foreground: 228 29% 14%;
+  --border: 227 20% 24%;
+  --input: 227 20% 24%;
+  --ring: 221 83% 60%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 90%, rgba(56, 189, 248, 0.2), transparent 25%),
+    linear-gradient(135deg, #eef4ff 0%, #f8fbff 50%, #f3f4f6 100%);
+  color: hsl(var(--foreground));
+  font-family: "Manrope", sans-serif;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.22), transparent 30%),
+    radial-gradient(circle at 85% 90%, rgba(30, 64, 175, 0.3), transparent 30%),
+    linear-gradient(145deg, #0b1020 0%, #0f172a 45%, #111827 100%);
+}
+
+.glass {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.dark .glass {
+  background: rgba(17, 24, 39, 0.66);
+}
