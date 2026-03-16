@@ -48,3 +48,55 @@ export async function requestAIMatchInsights(matchDetails) {
   }
   return data.data;
 }
+
+export async function requestAIAssistant(question) {
+  const response = await fetch("/api/ai/assistant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "API unavailable");
+  }
+  return data.data;
+}
+
+export async function requestAIPromptTheme(prompt, currentConfig) {
+  const response = await fetch("/api/ai/prompt-theme", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, currentConfig }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "API unavailable");
+  }
+  return data.data;
+}
+
+export async function requestAIAccessibilityFix(payload) {
+  const response = await fetch("/api/ai/accessibility-fix", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "API unavailable");
+  }
+  return data.data;
+}
+
+export async function requestAITroubleshoot(issue, platform) {
+  const response = await fetch("/api/ai/troubleshoot", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ issue, platform }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "API unavailable");
+  }
+  return data.data;
+}

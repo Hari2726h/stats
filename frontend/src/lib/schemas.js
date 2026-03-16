@@ -11,4 +11,7 @@ export const configSchema = z.object({
   theme: z.enum(["light", "dark"]),
   borderRadius: z.number().min(4).max(28),
   widgetSize: z.enum(["small", "medium", "large"]),
+  template: z.enum(["classic", "minimal", "broadcast"]),
+  locale: z.enum(["en-US", "en-GB", "hi-IN"]),
+  timezone: z.enum(["UTC", "Asia/Kolkata", "Europe/London", "America/New_York"]),
 });

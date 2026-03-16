@@ -1,7 +1,15 @@
 import express from "express";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import { generateAccessibleTheme, generateEmbedExamples, generateMatchInsights } from "../services/geminiService.js";
+import {
+  generateAccessibleTheme,
+  generateAccessibilityFix,
+  generateAssistantAnswer,
+  generateEmbedExamples,
+  generateMatchInsights,
+  generatePromptTheme,
+  generateTroubleshooting,
+} from "../services/geminiService.js";
 
 const router = express.Router();
 
@@ -20,6 +28,34 @@ const matchInsightsSchema = z.object({
   score: z.string().trim().min(1).max(20),
   stadium: z.string().trim().min(1).max(120),
   matchDate: z.string().trim().min(1).max(80),
+});
+
+const assistantSchema = z.object({
+  question: z.string().trim().min(2).max(500),
+});
+
+const promptThemeSchema = z.object({
+  prompt: z.string().trim().min(3).max(400),
+  currentConfig: z.object({
+    primaryColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+    secondaryColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+    accentColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+    fontFamily: z.string().min(1).max(50).default("Manrope"),
+    theme: z.enum(["light", "dark"]).default("light"),
+    template: z.enum(["classic", "minimal", "broadcast"]).default("classic"),
+  }),
+});
+
+const accessibilityFixSchema = z.object({
+  primaryColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+  secondaryColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+  accentColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/),
+  theme: z.enum(["light", "dark"]),
+});
+
+const troubleshootSchema = z.object({
+  issue: z.string().trim().min(3).max(800),
+  platform: z.enum(["html", "react", "wordpress", "nextjs", "other"]),
 });
 
 router.post("/theme", async (req, res, next) => {
@@ -75,6 +111,69 @@ router.post("/match-insights", async (req, res, next) => {
     return res.json({ data: result });
   } catch (error) {
     console.error("AI match insights generation failed:", error?.message || error);
+    return next({ status: 503, message: "AI service unavailable." });
+  }
+});
+
+router.post("/assistant", async (req, res, next) => {
+  const parsed = assistantSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid question." });
+  }
+
+  try {
+    const question = sanitizeHtml(parsed.data.question, { allowedTags: [], allowedAttributes: {} });
+    const result = await generateAssistantAnswer(question);
+    return res.json({ data: result });
+  } catch (error) {
+    console.error("AI assistant generation failed:", error?.message || error);
+    return next({ status: 503, message: "AI service unavailable." });
+  }
+});
+
+router.post("/prompt-theme", async (req, res, next) => {
+  const parsed = promptThemeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid prompt payload." });
+  }
+
+  try {
+    const prompt = sanitizeHtml(parsed.data.prompt, { allowedTags: [], allowedAttributes: {} });
+    const result = await generatePromptTheme(prompt, parsed.data.currentConfig);
+    return res.json({ data: result });
+  } catch (error) {
+    console.error("AI prompt-theme generation failed:", error?.message || error);
+    return next({ status: 503, message: "AI service unavailable." });
+  }
+});
+
+router.post("/accessibility-fix", async (req, res, next) => {
+  const parsed = accessibilityFixSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid color payload." });
+  }
+
+  try {
+    const result = await generateAccessibilityFix(parsed.data);
+    return res.json({ data: result });
+  } catch (error) {
+    console.error("AI accessibility-fix generation failed:", error?.message || error);
+    return next({ status: 503, message: "AI service unavailable." });
+  }
+});
+
+router.post("/troubleshoot", async (req, res, next) => {
+  const parsed = troubleshootSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid troubleshoot request." });
+  }
+
+  try {
+    const issue = sanitizeHtml(parsed.data.issue, { allowedTags: [], allowedAttributes: {} });
+    const result = await generateTroubleshooting(issue, parsed.data.platform);
+    return res.json({ data: result });
+  } catch (error) {
+    console.error("AI troubleshoot generation failed:", error?.message || error);
     return next({ status: 503, message: "AI service unavailable." });
   }
 });

@@ -103,6 +103,34 @@ export default function ThemeConfigurator({
             </div>
           </div>
 
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <Select {...register("template")}>
+                <option value="classic">Classic</option>
+                <option value="minimal">Minimal</option>
+                <option value="broadcast">Broadcast</option>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Locale</Label>
+              <Select {...register("locale")}>
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="hi-IN">Hindi (India)</option>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Timezone</Label>
+              <Select {...register("timezone")}>
+                <option value="UTC">UTC</option>
+                <option value="Asia/Kolkata">Asia/Kolkata</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="America/New_York">America/New_York</option>
+              </Select>
+            </div>
+          </div>
+
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Border Radius ({watch("borderRadius")}px)</Label>

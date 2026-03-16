@@ -17,10 +17,27 @@ export default function MatchWidgetPreview({
   logo,
   borderRadius,
   widgetSize,
+  template,
+  locale,
+  timezone,
   matchData,
   previewDevice,
 }) {
   const dark = theme === "dark";
+  const templateClass =
+    template === "minimal"
+      ? "ring-1 ring-white/30"
+      : template === "broadcast"
+        ? "ring-2 ring-offset-2 ring-offset-transparent"
+        : "";
+
+  const formattedDate = matchData?.matchDate
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: timezone,
+      }).format(new Date(matchData.matchDate))
+    : "Mar 24, 2026";
 
   return (
     <div className={previewDevice === "mobile" ? "mx-auto w-[360px]" : "w-full"}>
@@ -29,7 +46,7 @@ export default function MatchWidgetPreview({
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className={`mx-auto w-full ${sizeMap[widgetSize]}`}
+        className={`mx-auto w-full ${sizeMap[widgetSize]} ${templateClass}`}
         style={{
           fontFamily,
           borderRadius: `${borderRadius}px`,
@@ -39,6 +56,7 @@ export default function MatchWidgetPreview({
           border: `1px solid ${primaryColor}55`,
           boxShadow: `0 18px 45px ${primaryColor}30`,
           color: dark ? "#E2E8F0" : "#0F172A",
+          transform: template === "broadcast" ? "skewX(-1deg)" : "none",
         }}
       >
         <div className="space-y-4 p-6">
@@ -74,9 +92,7 @@ export default function MatchWidgetPreview({
               <p className="text-sm font-semibold">{matchData?.stadium || "Main Stadium"}</p>
             </div>
           </div>
-          <p className="text-sm opacity-80">
-            Match Date: {matchData?.matchDate ? new Date(matchData.matchDate).toLocaleString() : "Mar 24, 2026"}
-          </p>
+          <p className="text-sm opacity-80">Match Date: {formattedDate}</p>
         </div>
       </motion.div>
     </div>
